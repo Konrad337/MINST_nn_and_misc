@@ -1,14 +1,6 @@
 import itertools as it
-import struct
+from mnist_file_tools import get_bytes
 from graphics import Point, Text, GraphWin, color_rgb, Rectangle
-
-
-def get_bytes(file, bytes=4):
-    if bytes is 4:
-        return int(struct.unpack('>i', file.read(4))[0])
-    elif bytes is 1:
-        return ord(file.read(1))
-# Get integer value of given bytes
 
 
 def print_next_image(columns, rows, file, win,
@@ -25,7 +17,7 @@ def print_next_image(columns, rows, file, win,
                                     j*scale - width/2 + translation_y),
                               Point(i*scale + width/2 + translation_x,
                                     j*scale + width/2 + translation_y))
-            color = get_bytes(file, 1)
+            color =  get_bytes(file, 1)
             point.setFill(color_rgb(color, color, color))
             point.draw(win)
 # Prints next frame of digits, 25 be default

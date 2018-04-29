@@ -1,34 +1,15 @@
 import numpy as np
-import itertools as it
-import struct
+from mnist_file_tools import get_bytes, get_input_layer, get_label
 
-
-def get_bytes(file, bytes=4):
-    if bytes is 4:
-        return int(struct.unpack('>i', file.read(4))[0])
-    elif bytes is 1:
-        return ord(file.read(1))
-# Get integer value of given bytes
+number_of_layers = 30
 
 
 def nonlin(x, deriv=False):
     if deriv is True:
-        return x*(1-x)*0.00001
+        return x*(1-x) * 0.1
+
     return 1/(1+np.exp(-x))
 # sigmoid function
-
-
-def get_input_layer(file, rows, columns):
-    layer = np.zeros((rows, columns), dtype=int)
-    for i, j in it.product(range(rows), range(columns)):
-        layer[i, j] = get_bytes(file, 1)
-    return layer
-# 2-d array of one digit
-
-
-def get_label(file):
-    return get_bytes(file, 1)
-# next label
 
 
 def nn(set, labels):
@@ -48,45 +29,108 @@ def nn(set, labels):
     rows = get_bytes(train_set)
     columns = get_bytes(train_set)
 
-    number_of_layers = 3
-
     synapses = 2*np.random.random((number_of_layers,
-                                   rows*columns,
+                                   rows*columns + 1,
                                    rows*columns)) - 1
-    output_synapses = 2*np.random.random((rows*columns, 10)) - 1
-    layers = np.zeros((number_of_layers, rows * columns), dtype=float)
+    output_synapses = 2*np.random.random((rows*columns + 1, 10)) - 1
+    layers = np.zeros((number_of_layers, rows * columns + 1), dtype=np.float128)
 
+    guessed = 0
+    set_size = 1000
     for iter in range(set_size):
-        layers[0] = np.resize(get_input_layer(train_set, rows, columns),
-                              (rows*columns))
+        layers[0] = np.append(np.resize(
+                                get_input_layer(train_set, rows, columns),
+                                (rows*columns)), [1])
 
         for i in range(1, number_of_layers):
-            layers[i, :] = nonlin(np.dot(layers[i-1, :], synapses[i-1, :]))
+            layers[i, :-1] = nonlin(np.dot(layers[i-1, :],
+                                           synapses[i-1, :]))
+            layers[i, -1] = 1
         output_layer = nonlin(np.dot(layers[number_of_layers-1],
                                      output_synapses))
         # Forward prop - calculating layers
 
         output_correct = np.zeros(10, dtype=float)
-        output_correct[get_label(label_set)] = 1
+        correct_number = get_label(label_set)
+        output_correct[correct_number] = 1
+
+        if np.argmax(output_layer) == correct_number:
+            guessed += 1
         # Getting correct output for last layer
 
-        output_error = output_correct - output_layer
+        output_error = (output_layer - output_correct)**2
         output_delta = output_error * nonlin(output_layer, deriv=True)
         # Calculating error and delta for last
 
-        delta = np.zeros((number_of_layers, rows*columns), dtype=float)
-        error = np.zeros((number_of_layers, rows*columns), dtype=float)
+        delta = np.zeros((number_of_layers, rows*columns + 1), dtype=np.float128)
+        error = np.zeros((number_of_layers, rows*columns + 1), dtype=float)
         error[number_of_layers-1] = output_delta.dot(output_synapses.T)
-        for i in range(number_of_layers-1, 0, -1):
+        for i in range(number_of_layers-1, -1, -1):
             delta[i] = error[i] * nonlin(layers[i], deriv=True)
-            error[i-1] = delta[i].dot(synapses[i-1].T)
-        # Calculating errors
+            error[i-1] = (delta[i, :-1].dot(synapses[i-1].T))**2
+        # Calculating errors and derivetasomething
 
         output_synapses += np.dot(output_layer.T, output_delta)
-        for i in range(number_of_layers-1, 0, -1):
-            synapses[i] += np.dot(layers[i].T, delta[i-1])
+        for i in range(number_of_layers-2, -1, -1):
+            synapses[i] += np.dot(layers[i].T, delta[i+1])
 
-        if iter % 100 == 0:
-            print("Iteration {0}\tError: {1:0.6f}"
-                  .format(iter, np.sum(output_error)))
-    print(output_layer)
+        if iter % 10 == 0:
+            print("Iteration {0}\tSum of Errors: {1:0.1f}, Guessed correct: {2}"
+                  .format(iter, np.sum(np.abs(output_error)), guessed))
+            guessed = 0
+            print(output_layer)
+            print(output_error)
+    return (layers, synapses, output_synapses)
+
+#
+#
+#
+#
+#
+#
+
+
+def check_neural(test_data, test_labels, layers, synapses, output_synapses):
+
+    train_set = open(test_data, 'rb')
+    label_set = open(test_labels, 'rb')
+
+    m_n = get_bytes(train_set)
+    if m_n != 2051:
+        raise Exception('Wrong magic number ' + str(m_n))
+    m_n = get_bytes(label_set)
+    if m_n != 2049:
+        raise Exception('Wrong magic number ' + str(m_n))
+
+    set_size = get_bytes(train_set)
+    get_bytes(label_set)
+    rows = get_bytes(train_set)
+    columns = get_bytes(train_set)
+
+    guessed = 0
+    set_size = 1000
+    for iter in range(set_size):
+        layers[0] = np.append(np.resize(
+                                get_input_layer(train_set, rows, columns),
+                                (rows*columns)), [1])
+
+        for i in range(1, number_of_layers):
+            layers[i, :-1] = nonlin(np.dot(layers[i-1, :],
+                                           synapses[i-1, :]))
+            layers[i, -1] = 1
+        output_layer = nonlin(np.dot(layers[number_of_layers-1],
+                                     output_synapses))
+        # Forward prop - calculating layers
+
+        output_correct = np.zeros(10, dtype=float)
+        correct_number = get_label(label_set)
+        output_correct[correct_number] = 1
+
+        if np.argmax(output_layer) == correct_number:
+            guessed += 1
+
+        if iter % 100 == 0 and iter > 0:
+            print("Iteration {0}\t, Guessed correct: {1}/{3}"
+                  .format(iter, guessed, set_size))
+    print("Guessed with percentage " + str(guessed/set_size) + "%\n")
+    return (layers, synapses, output_synapses)
