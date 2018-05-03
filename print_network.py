@@ -9,10 +9,11 @@ def clear(win):
     win.update()
 
 
-def print_net(layers, synapses, output_layer, output_synapses, win):
+def print_net(layers, synapses, output_layer, output_synapses, win, correct, cost):
     clear(win)
     width = win.getWidth()
     height = win.getHeight()
+    max_neuron_width = 3
     scale_w = width / np.size(layers, 0) / 1.5
     scale_h = height / np.size(layers, 1) / 1.5
     translation_x = 100
@@ -22,7 +23,7 @@ def print_net(layers, synapses, output_layer, output_synapses, win):
                            range(np.size(layers, 1))):
 
         neuron = Circle(Point(i*scale_w + translation_x,
-                        j*scale_h + translation_y), scale_h/3)
+                        j*scale_h + translation_y), min(scale_w, scale_h)/3)
         color0 = layers[i, j] * (124 - 178) + 178
         color1 = layers[i, j] * (252 - 34) + 34
         color2 = layers[i, j] * (0 - 34) + 34
@@ -32,7 +33,7 @@ def print_net(layers, synapses, output_layer, output_synapses, win):
     for i in range(np.size(output_layer, 0)):
 
         neuron = Circle(Point(np.size(layers, 0)*scale_w + translation_x,
-                        i*scale_h + translation_y), scale_h/3)
+                        i*scale_h + translation_y), min(scale_w, scale_h)/3)
         color0 = output_layer[i] * (124 - 178) + 178
         color1 = output_layer[i] * (252 - 34) + 34
         color2 = output_layer[i] * (0 - 34) + 34
@@ -50,6 +51,7 @@ def print_net(layers, synapses, output_layer, output_synapses, win):
         color0 = synapses[i, j, k] * (124 - 178) + 178
         color1 = synapses[i, j, k] * (252 - 34) + 34
         color2 = synapses[i, j, k] * (0 - 34) + 34
+        synapse.setWidth(synapses[i, j, k]*max_neuron_width)
         synapse.setFill(color_rgb(int(color0), int(color1), int(color2)))
         synapse.draw(win)
 
@@ -63,5 +65,12 @@ def print_net(layers, synapses, output_layer, output_synapses, win):
         color0 = output_synapses[i, j] * (124 - 178) + 178
         color1 = output_synapses[i, j] * (252 - 34) + 34
         color2 = output_synapses[i, j] * (0 - 34) + 34
+        synapse.setWidth(output_synapses[i, j]*max_neuron_width)
         synapse.setFill(color_rgb(int(color0), int(color1), int(color2)))
         synapse.draw(win)
+
+    message = Text(Point(win.getWidth()/2, win.getHeight()*115/120),
+                   'Correct output: ' + str(correct) + ' , cost: ' + str(cost))
+    message.setTextColor('black')
+    message.setSize(20)
+    message.draw(win)

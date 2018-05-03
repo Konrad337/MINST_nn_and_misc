@@ -11,6 +11,10 @@ I'm visualizing the network itself (without input layer cuz it's BIG):
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/screen02.png "Net vizualizer")
 
-Dead network, haven't worked yet:
+Dead network, has not worked yet:
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/screen03.png "Net vizualizer")
+
+Graph of cost function (network still down):
+
+![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/cost_graph_wrong.png "Cost graph")
