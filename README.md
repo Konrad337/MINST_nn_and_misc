@@ -18,3 +18,7 @@ Dead network, has not worked yet:
 Graph of cost function (network still down):
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/cost_graph_wrong.png "Cost graph")
+
+Graph of output synapses (network still down):
+
+![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/faulty_output_synapses.png "Faulty synapses")

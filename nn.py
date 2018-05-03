@@ -3,6 +3,7 @@ from mnist_file_tools import get_bytes, get_input_layer, get_label
 import print_network
 from graphics import GraphWin
 import matplotlib.pyplot as plt
+import math
 
 number_of_layers = 4
 layer_size = 10
@@ -19,13 +20,8 @@ def nonlin(x, deriv=False):
 
 
 def update_line(hl, new_data):
-
     hl.set_xdata(np.append(hl.get_xdata(), new_data[0]))
-    if type(new_data[1]).__module__ == 'numpy':
-        hl.set_ydata(np.append(hl.get_ydata(), new_data[1]))
-    else:
-        hl.set_ydata(np.append(hl.get_ydata(), new_data[1]))
-    plt.draw()
+    hl.set_ydata(np.append(hl.get_ydata(), new_data[1]))
 # Update graph
 
 
@@ -57,6 +53,8 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
     output_synapses = 2*np.random.random((layer_size + 1, 10)) - 1
     input_synapses = 2*np.random.random((rows * columns + 1, layer_size)) - 1
     layers = np.zeros((number_of_layers, layer_size + 1), dtype=np.float128)
+    min_output_synapses = math.inf
+    max_output_synapses = -math.inf
     # init
 
     if print_net:
@@ -76,12 +74,13 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
         plt.ylabel('guesses percentage')
         plt.axis([0, set_size, 0, 100])
     if draw_synapses_plot:
-        fig_synapses = plt.figure()
-        synapses_plot, = plt.plot([], [], '--')
-        fig_synapses.add_subplot(1, 1, 1)
+        plt.figure()
+        synapses_plot = []
+        for i in range(output_synapses.size):
+            synapses_plot.append(plt.plot([], [], '--')[0])
         plt.xlabel('iter')
         plt.ylabel('synapses_val')
-    # Setting up prining
+    # Setting up plots
 
     guessed = 0
     for iter in range(set_size):
@@ -147,9 +146,16 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
             if draw_guess_plot:
                 update_line(guess_plot, [iter, guessed/draw_iter*100])
             if draw_synapses_plot:
-                print(np.amax(output_synapses))
-                plt.axis([0, set_size, 0, np.amax(output_synapses)])
-                update_line(synapses_plot, [iter, output_synapses])
+                min_output_synapses = min(np.amin(output_synapses),
+                                          min_output_synapses)
+                max_output_synapses = max(np.amax(output_synapses),
+                                          max_output_synapses)
+                plt.axis([0, set_size, min_output_synapses, max_output_synapses])
+                for i in range(output_synapses.size):
+                    update_line(synapses_plot[i],
+                                [iter,
+                                 np.resize(output_synapses,
+                                           output_synapses.size)[i]])
             if draw_cost_plot or draw_guess_plot or draw_synapses_plot:
                 plt.draw()
                 plt.pause(0.001)
