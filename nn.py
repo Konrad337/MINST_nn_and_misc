@@ -7,8 +7,8 @@ import math
 
 
 number_of_layers = 2
-layer_size = 100
-learning_rate = 1
+layer_size = 200
+learning_rate = 0.1
 draw_iter = 1000
 
 
@@ -62,7 +62,6 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
     rows = get_bytes(train_set)
     columns = get_bytes(train_set)
     # loading data
-
 
     synapses = 2*np.random.random((number_of_layers-1,
                                    layer_size + 1,
@@ -142,11 +141,13 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
         cost = np.sum((output_delta)**2)
         # Cost for statistics
 
-        output_w_influence = np.dot(layers[number_of_layers-1][:, None], (output_delta)[None, :])
+        output_w_influence = np.dot(layers[number_of_layers-1][:, None],
+                                    (output_delta)[None, :])
         # Calculating delta and w_influence for last,
         # where w_influence is influence of weights on delta
 
-        w_influence = np.zeros((number_of_layers, layer_size + 1, layer_size), dtype=np.float128)
+        w_influence = np.zeros((number_of_layers, layer_size + 1, layer_size),
+                               dtype=np.float128)
         delta = np.zeros((number_of_layers, layer_size + 1), dtype=np.float128)
         delta[number_of_layers-1] = output_delta \
             .dot(output_synapses.T)
@@ -243,7 +244,7 @@ def check_neural(test_data, test_labels, layers, input_synapses, synapses, outpu
         # Forward prop - calculating layers with sigmoid fun
 
         output_layer = softmax(np.dot(layers[number_of_layers-1],
-                              output_synapses))
+                               output_synapses))
 
         output_correct = np.zeros(10, dtype=float)
         correct_number = get_label(label_set)
@@ -259,4 +260,3 @@ def check_neural(test_data, test_labels, layers, input_synapses, synapses, outpu
             print("Iteration {0}\t, Guessed correct: {1}/{2}"
                   .format(iter, guessed, set_size))
     print("Guessed with percentage " + str(guessed/set_size) + "%\n")
-    return (layers, synapses, output_synapses)

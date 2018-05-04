@@ -23,6 +23,12 @@ Graph of output synapses (network still down):
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/faulty_output_synapses.png "Faulty synapses")
 
-Working for the first time:
+## Working for the first time
+Only with 2 layered neural-network so there must be a bug left in implementation,
+I have hard coded transition between input -> first layer of size n,  
+                                     last layer of size n -> output    
+So it's actually impossible to do 1 layer
+
+For 200x2 network it caps at ~83% guess rate
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/first_time_working.png "First time working")
