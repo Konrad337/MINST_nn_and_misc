@@ -5,18 +5,34 @@ from graphics import GraphWin
 import matplotlib.pyplot as plt
 import math
 
-number_of_layers = 4
-layer_size = 10
-learning_rate = 0.00001
+
+number_of_layers = 2
+layer_size = 100
+learning_rate = 1
 draw_iter = 1000
+
+
+def softmax(x):
+    exps = np.exp(x - x.max())
+    return exps / np.sum(exps)
+# Copy paste softmax
 
 
 def nonlin(x, deriv=False):
     if deriv is True:
-        return x*(1 - x)
+        return (x)*(1 - (x))
 
     return 1/(1+np.exp(-x))
 # sigmoid function
+
+
+def relu(x, deriv=False):
+    if deriv is True:
+        x[x <= 0] = 0
+        x[x > 0] = 1
+        return x
+    return np.max(x, 0)
+# relu
 
 
 def update_line(hl, new_data):
@@ -24,6 +40,7 @@ def update_line(hl, new_data):
     hl.set_ydata(np.append(hl.get_ydata(), new_data[1]))
 # Update graph
 
+##############################################################################
 
 def nn(set, labels, print_net=True, draw_cost_plot=True,
        draw_guess_plot=True, draw_synapses_plot=False):
@@ -83,25 +100,33 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
     # Setting up plots
 
     guessed = 0
+
+###############################################################################
+
     for iter in range(set_size):
 
         input_layer = np.append(np.resize(
                                 get_input_layer(train_set, rows, columns),
-                                (rows*columns)), [1])
+                                (rows*columns)), [1]) / 255
+        # Loading data with normalization (data points in range 0-255)
 
         layers[0, :-1] = nonlin(np.dot(input_layer,
                                        input_synapses))
         layers[0, -1] = 1
+        # Using RELU for first layer
+
         for i in range(1, number_of_layers):
             layers[i, :-1] = nonlin(np.dot(layers[i-1, :],
                                            synapses[i-1, :]))
             layers[i, -1] = 1
-        output_layer = nonlin(np.dot(layers[number_of_layers-1],
-                                     output_synapses))
-        # Forward prop - calculating layers
+        # Forward prop - calculating layers with sigmoid fun
+
+        output_layer = softmax(np.dot(layers[number_of_layers-1],
+                              output_synapses))
 
         output_correct = np.zeros(10, dtype=float)
         correct_number = get_label(label_set)
+
         output_correct[correct_number] = 1
         # Getting correct output for last layer
 
@@ -109,33 +134,43 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
             guessed += 1
         # Calculating how many good guesses would we get
 
-        output_error = (output_layer - output_correct)
-        cost = np.sum(np.abs(output_layer - output_correct)**2)
-        output_delta = output_error * nonlin(output_layer, deriv=True)
-        # Calculating error and delta for last,
-        # where delta is an error weighted derivative
+        # output_delta = -1 * output_correct * 1/output_layer \
+        #    + (1 - output_correct) * 1/(1 - output_layer)
+        # dE / dOout
+        output_delta = output_layer - output_correct
 
+        cost = np.sum((output_delta)**2)
+        # Cost for statistics
+
+        output_w_influence = np.dot(layers[number_of_layers-1][:, None], (output_delta)[None, :])
+        # Calculating delta and w_influence for last,
+        # where w_influence is influence of weights on delta
+
+        w_influence = np.zeros((number_of_layers, layer_size + 1, layer_size), dtype=np.float128)
         delta = np.zeros((number_of_layers, layer_size + 1), dtype=np.float128)
-        error = np.zeros((number_of_layers, layer_size + 1), dtype=np.float128)
-        error[number_of_layers-1] = output_delta.dot(output_synapses.T)
-        for i in range(number_of_layers-1, 0, -1):
-            delta[i] = error[i] * nonlin(layers[i], deriv=True)
-            error[i-1] = (delta[i, :-1].dot(synapses[i-1].T))
+        delta[number_of_layers-1] = output_delta \
+            .dot(output_synapses.T)
 
-        delta[0] = error[0] * nonlin(layers[0], deriv=True)
-        input_error = (delta[0, :-1].dot(input_synapses.T))
-        input_delta = input_error * nonlin(input_layer, deriv=True)
-        # Calculating errors and deltas for others
+        for i in range(number_of_layers-2, 0, -1):
+            w_influence[i] = np.dot(layers[i][:, None], (delta[i+1, :-1])[None, :])
+            delta[i-1] = delta[i, :-1].dot(synapses[i-1].T)
 
-        output_synapses += output_layer.T.dot(output_delta) * learning_rate
-        input_synapses += input_layer.T.dot(input_delta) * learning_rate
-        for i in range(0, number_of_layers-1):
-            synapses[i] += layers[i].T.dot(delta[i]) * learning_rate
+        w_influence[0] = np.dot(layers[0][:, None], (delta[1, :-1])[None, :])
+        input_w_influence = np.dot(input_layer[:, None], (delta[0, :-1])[None, :])
+        # Calculating deltas and w_influences for others
+
+        output_synapses -= output_w_influence * learning_rate
+        input_synapses -= input_w_influence * learning_rate
+
+        for i in range(0, number_of_layers - 1):
+            synapses[i] -= w_influence[i] * learning_rate
         # Changing syanpses
 
+        ###################
+
         if iter % draw_iter == 0:
-            print("Iteration {0}\tSum of Errors: {1:0.1f}, Guessed correct: {2}"
-                  .format(iter, np.sum(np.abs(output_error)), guessed))
+            print("Iteration {0}\tSum of deltas: {1:0.1f}, Guessed correct: {2}"
+                  .format(iter, np.sum(np.abs(output_delta)), guessed))
             if print_net:
                 print_network.print_net(layers, nonlin(synapses),
                                         output_layer, nonlin(output_synapses),
@@ -159,11 +194,11 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
             if draw_cost_plot or draw_guess_plot or draw_synapses_plot:
                 plt.draw()
                 plt.pause(0.001)
-            print(output_layer)
-            print(output_delta)
             guessed = 0
-    return (layers, synapses, output_synapses)
 
+    return (layers, input_synapses, synapses, output_synapses)
+
+###############################################################################
 #
 #
 #
@@ -172,7 +207,7 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
 #
 
 
-def check_neural(test_data, test_labels, layers, synapses, output_synapses):
+def check_neural(test_data, test_labels, layers, input_synapses, synapses, output_synapses):
 
     train_set = open(test_data, 'rb')
     label_set = open(test_labels, 'rb')
@@ -190,26 +225,35 @@ def check_neural(test_data, test_labels, layers, synapses, output_synapses):
     columns = get_bytes(train_set)
 
     guessed = 0
-    set_size = 1000
     for iter in range(set_size):
-        layers[0] = np.append(np.resize(
+        input_layer = np.append(np.resize(
                                 get_input_layer(train_set, rows, columns),
-                                (layer_size)), [1])
+                                (rows*columns)), [1]) / 255
+        # Loading data with normalization (data points in range 0-255)
+
+        layers[0, :-1] = nonlin(np.dot(input_layer,
+                                       input_synapses))
+        layers[0, -1] = 1
+        # Using RELU for first layer
 
         for i in range(1, number_of_layers):
             layers[i, :-1] = nonlin(np.dot(layers[i-1, :],
                                            synapses[i-1, :]))
             layers[i, -1] = 1
-        output_layer = nonlin(np.dot(layers[number_of_layers-1],
-                                     output_synapses))
-        # Forward prop - calculating layers
+        # Forward prop - calculating layers with sigmoid fun
+
+        output_layer = softmax(np.dot(layers[number_of_layers-1],
+                              output_synapses))
 
         output_correct = np.zeros(10, dtype=float)
         correct_number = get_label(label_set)
+
         output_correct[correct_number] = 1
+        # Getting correct output for last layer
 
         if np.argmax(output_layer) == correct_number:
             guessed += 1
+        # Calculating how many good guesses would we get
 
         if iter % 1000 == 0 and iter > 0:
             print("Iteration {0}\t, Guessed correct: {1}/{2}"

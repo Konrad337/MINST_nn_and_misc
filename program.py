@@ -2,11 +2,11 @@ from set_vizualitiation import vizualize
 from nn import nn, check_neural
 
 #vizualize('./data/train-images', './data/train-labels')
-(layers, synapses, output_synapses) = nn('./data/train-images',
+(layers, input_synapses, synapses, output_synapses) = nn('./data/train-images',
                                          './data/train-labels',
-                                         False,
-                                         False,
-                                         False,
-                                         True)
-check_neural('./data/images', './data/labels', layers,
+                                         True,
+                                         True,
+                                         True,
+                                         False)
+check_neural('./data/images', './data/labels', layers, input_synapses,
              synapses, output_synapses)

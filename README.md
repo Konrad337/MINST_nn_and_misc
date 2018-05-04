@@ -22,3 +22,7 @@ Graph of cost function (network still down):
 Graph of output synapses (network still down):
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/faulty_output_synapses.png "Faulty synapses")
+
+Working for the first time:
+
+![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/first_time_working.png "First time working")
