@@ -3,7 +3,7 @@
 Aim of project is to familiarize myself with neural networks, be default I will
 be printing graphs and such
 
-I'm visualizing the data set, it may prove usefull later to see where network makes mistakes:
+I'm visualizing the data set, it may prove useful later to see where network makes mistakes:
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/screen01.png "Data vizualizer")
 
@@ -31,7 +31,13 @@ input -> first layer of size n,
 last layer of size n -> output,     
 so it's actually impossible to do 1 layer
 
-For 200x2 network it caps at ~83% guess rate
+For 2x200 network it caps at ~83% guess rate
 
-Here's screen of 100x2
+Here's screen of 2x100
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/first_time_working.png "First time working")
+
+### Working with different layer sizes
+I've had bug with indexes, it zeroed my deltas below delta[n], now it works with
+every size and 2-layered performance is better, also some minor bug with normalization
+Here's screen of 3x50
+![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/3x50.png "3x50")

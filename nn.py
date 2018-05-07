@@ -5,10 +5,6 @@ from graphics import GraphWin
 import matplotlib.pyplot as plt
 import math
 
-
-number_of_layers = 2
-layer_size = 200
-learning_rate = 0.1
 draw_iter = 1000
 
 
@@ -42,9 +38,13 @@ def update_line(hl, new_data):
 
 ##############################################################################
 
-def nn(set, labels, print_net=True, draw_cost_plot=True,
-       draw_guess_plot=True, draw_synapses_plot=False):
 
+def nn(print_net=True, draw_cost_plot=True,
+       draw_guess_plot=True, draw_synapses_plot=False, draw_synapses=False,
+       layer_size=50, number_of_layers=3, learning_rate=0.001):
+
+    set = './data/train-images'
+    labels = './data/train-labels'
     np.random.seed(1)
     train_set = open(set, 'rb')
     label_set = open(labels, 'rb')
@@ -99,6 +99,7 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
     # Setting up plots
 
     guessed = 0
+    cost_arr = np.zeros(draw_iter) + 10
 
 ###############################################################################
 
@@ -106,7 +107,7 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
 
         input_layer = np.append(np.resize(
                                 get_input_layer(train_set, rows, columns),
-                                (rows*columns)), [1]) / 255
+                                (rows*columns)) / 255, [1])
         # Loading data with normalization (data points in range 0-255)
 
         layers[0, :-1] = nonlin(np.dot(input_layer,
@@ -121,7 +122,7 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
         # Forward prop - calculating layers with sigmoid fun
 
         output_layer = softmax(np.dot(layers[number_of_layers-1],
-                              output_synapses))
+                                      output_synapses))
 
         output_correct = np.zeros(10, dtype=float)
         correct_number = get_label(label_set)
@@ -138,7 +139,7 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
         # dE / dOout
         output_delta = output_layer - output_correct
 
-        cost = np.sum((output_delta)**2)
+        cost_arr[iter % draw_iter] = np.sum((output_delta)**2)
         # Cost for statistics
 
         output_w_influence = np.dot(layers[number_of_layers-1][:, None],
@@ -154,9 +155,10 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
 
         for i in range(number_of_layers-2, 0, -1):
             w_influence[i] = np.dot(layers[i][:, None], (delta[i+1, :-1])[None, :])
-            delta[i-1] = delta[i, :-1].dot(synapses[i-1].T)
+            delta[i] = delta[i+1, :-1].dot(synapses[i].T)
 
         w_influence[0] = np.dot(layers[0][:, None], (delta[1, :-1])[None, :])
+        delta[0] = delta[1, :-1].dot(synapses[0].T)
         input_w_influence = np.dot(input_layer[:, None], (delta[0, :-1])[None, :])
         # Calculating deltas and w_influences for others
 
@@ -170,13 +172,14 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
         ###################
 
         if iter % draw_iter == 0:
-            print("Iteration {0}\tSum of deltas: {1:0.1f}, Guessed correct: {2}"
-                  .format(iter, np.sum(np.abs(output_delta)), guessed))
+            cost = np.sum(cost_arr) / draw_iter
+            print("Iteration {0}\tAverage cost: {1:0.1f}, Guessed correct: {2}"
+                  .format(iter, cost, guessed))
             if print_net:
                 print_network.print_net(layers, nonlin(synapses),
                                         output_layer, nonlin(output_synapses),
                                         net_win, np.argmax(output_correct),
-                                        cost)
+                                        cost, draw_synapses)
             if draw_cost_plot:
                 update_line(cost_plot, [iter, cost])
             if draw_guess_plot:
@@ -208,7 +211,9 @@ def nn(set, labels, print_net=True, draw_cost_plot=True,
 #
 
 
-def check_neural(test_data, test_labels, layers, input_synapses, synapses, output_synapses):
+def check_neural(test_data, test_labels, layers,
+                 input_synapses, synapses, output_synapses,
+                 number_of_layers=2):
 
     train_set = open(test_data, 'rb')
     label_set = open(test_labels, 'rb')
