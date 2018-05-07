@@ -38,6 +38,7 @@ Here's screen of 2x100
 
 ### Working with different layer sizes
 I've had bug with indexes, it zeroed my deltas below delta[n], now it works with
-every size and 2-layered performance is better, also some minor bug with normalization
+every size and 2-layered performance is better
+
 Here's screen of 3x50
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/3x50.png "3x50")
