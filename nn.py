@@ -5,6 +5,7 @@ from graphics import GraphWin
 import matplotlib.pyplot as plt
 import math
 
+
 draw_iter = 1000
 
 
@@ -17,7 +18,7 @@ def softmax(x):
 def nonlin(x, deriv=False):
     if deriv is True:
         return (x)*(1 - (x))
-
+    x = np.clip(x, -500, 500)
     return 1/(1+np.exp(-x))
 # sigmoid function
 
@@ -41,7 +42,7 @@ def update_line(hl, new_data):
 
 def nn(print_net=True, draw_cost_plot=True,
        draw_guess_plot=True, draw_synapses_plot=False, draw_synapses=False,
-       layer_size=50, number_of_layers=3, learning_rate=0.001):
+       layer_size=100, number_of_layers=5, learning_rate=0.001):
 
     set = './data/train-images'
     labels = './data/train-labels'

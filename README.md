@@ -42,3 +42,6 @@ every size and 2-layered performance is better
 
 Here's screen of 3x50
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/3x50.png "3x50")
+
+5x100 just for fun
+![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/5x100.png "5x100")
