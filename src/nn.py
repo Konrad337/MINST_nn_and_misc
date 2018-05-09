@@ -44,8 +44,8 @@ def nn(print_net=True, draw_cost_plot=True,
        draw_guess_plot=True, draw_synapses_plot=False, draw_synapses=False,
        layer_size=100, number_of_layers=4, learning_rate=0.001):
 
-    set = './data/train-images'
-    labels = './data/train-labels'
+    set = '../data/train-images'
+    labels = '../data/train-labels'
     np.random.seed(1)
     train_set = open(set, 'rb')
     label_set = open(labels, 'rb')
@@ -212,9 +212,11 @@ def nn(print_net=True, draw_cost_plot=True,
 #
 
 
-def check_neural(test_data, test_labels, layers,
-                 input_synapses, synapses, output_synapses,
+def check_neural(layers, input_synapses, synapses, output_synapses,
                  number_of_layers=2):
+
+    test_data = '../data/images'
+    test_labels = '../data/labels'
 
     train_set = open(test_data, 'rb')
     label_set = open(test_labels, 'rb')

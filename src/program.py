@@ -9,5 +9,5 @@ from nn import nn, check_neural
                                          True,
                                          True,
                                          False)
-check_neural('./data/images', './data/labels', layers, input_synapses,
+check_neural('../data/images', '../data/labels', layers, input_synapses,
              synapses, output_synapses)
