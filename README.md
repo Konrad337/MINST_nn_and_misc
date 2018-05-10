@@ -15,10 +15,6 @@ Dead network, has not worked yet:
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/pics/screen03.png "Net vizualizer")
 
-Graph of cost function (network still down):
-
-![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/pics/cost_graph_wrong.png "Cost graph")
-
 Graph of output synapses (network still down):
 
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/pics/faulty_output_synapses.png "Faulty synapses")
@@ -43,5 +39,5 @@ every size and 2-layered performance is better
 Here's screen of 3x50
 ![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/pics/3x50.png "3x50")
 
-5x100 just for fun
-![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/pics/5x100.png "5x100")
+### Added some amateur visualizer of how neurons see their input. It'd need lots of work to work properly
+![alt text](https://github.com/Konrad337/MINST_nn_and_misc/blob/master/pics/input_viz.png "how neurons see their input")

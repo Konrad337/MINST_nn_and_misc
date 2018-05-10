@@ -42,7 +42,7 @@ def update_line(hl, new_data):
 
 def nn(print_net=True, draw_cost_plot=True,
        draw_guess_plot=True, draw_synapses_plot=False, draw_synapses=False,
-       layer_size=100, number_of_layers=4, learning_rate=0.001):
+       layer_size=30, number_of_layers=2, learning_rate=0.001):
 
     set = '../data/train-images'
     labels = '../data/train-labels'
@@ -75,7 +75,7 @@ def nn(print_net=True, draw_cost_plot=True,
     # init
 
     if print_net:
-        net_win = GraphWin('Neural Net', 1600, 900, autoflush=True)
+        net_win = GraphWin('Neural Net', 1600, 1000, autoflush=False)
     if draw_cost_plot:
         if draw_guess_plot:
             plt.subplot(211)
@@ -176,11 +176,16 @@ def nn(print_net=True, draw_cost_plot=True,
             cost = np.sum(cost_arr) / draw_iter
             print("Iteration {0}\tAverage cost: {1:0.1f}, Guessed correct: {2}"
                   .format(iter, cost, guessed))
-            if print_net:
+            if False:
                 print_network.print_net(layers, nonlin(synapses),
                                         output_layer, nonlin(output_synapses),
                                         net_win, np.argmax(output_correct),
                                         cost, draw_synapses)
+            if print_net:
+                print_network.print_vizualized_net(input_layer, (input_synapses), layers, (synapses),
+                                        output_layer, (output_synapses),
+                                        net_win, np.argmax(output_correct),
+                                        cost, columns, rows)
             if draw_cost_plot:
                 update_line(cost_plot, [iter, cost])
             if draw_guess_plot:
