@@ -21,11 +21,6 @@ Graph of output synapses (network still down):
 
 ## Working for the first time
 Only with 2 layered neural-network so there must be a bug left in implementation,
-I have hard coded transition between
-
-input -> first layer of size n,   
-last layer of size n -> output,     
-so it's actually impossible to do 1 layer
 
 For 2x200 network it caps at ~83% guess rate
 
